@@ -1,0 +1,24 @@
+# Python cache & temporary build scripts
+__pycache__/
+*.py[cod]
+*$py.class
+*.py
+*.wav
+
+# Scratch & unused references
+scratch/
+experience-EYI3LP55.js
+universe-BNLW5SO6.js
+style-e49650d14a61.css
+preview.html
+ref_*
+preview_scene1.jpg
+preview_scene2.jpg
+preview_scene4.jpg
+preview_scene5.jpg
+swiss_ch1.jpg
+swiss_ch3.jpg
+swiss_ch5.jpg
+swiss_ch6.jpg
+swiss_ch7.jpg
+swiss_ch8.jpg

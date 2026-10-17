@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" content="#111416" id="theme-color">
+  <title>李减除｜AI开发工程师 · 用代码构建富有生命力的交互体验</title>
+  <meta name="description" content="李减除的个人主页。AI开发工程师，探索大模型Agent、算法生成动效与高维图形交互，致力于用代码构建富有生命力的人机界面。">
+  <meta name="author" content="李减除">
+
+  <!-- Anti-FOUC (Flash of Unstyled Content) Theme Initializer -->
+  <script>
+    (function() {
+      try {
+        const saved = localStorage.getItem('jianchu-theme');
+        const theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.dataset.theme = theme;
+      } catch (e) {}
+    })();
+  </script>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Fira+Code:wght@400;500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+  
+  <!-- Modern Modular Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+  <!-- Fullscreen Fixed WebGL Universe Background -->
+  <canvas id="universe-canvas"></canvas>
+
+  <!-- Top Reading Progress -->
+  <div class="reading-progress" id="progress-bar"></div>
+
+  <!-- Global Header -->
+  <header class="header">
+    <a class="brand" href="#top">
+      李减除<span class="brand-star">-÷</span>
+    </a>
+    <nav class="nav-links">
+      <a class="nav-link" href="#work">最近在做</a>
+      <a class="nav-link" href="#about">关于我</a>
+      <a class="nav-link" href="#contact">联系</a>
+      <button class="theme-toggle liquid-button" id="theme-btn" type="button" aria-label="切换深浅主题" title="切换深浅主题">
+        <svg class="theme-icon icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="4"></circle>
+          <path d="M12 2v2"></path>
+          <path d="M12 20v2"></path>
+          <path d="m4.93 4.93 1.41 1.41"></path>
+          <path d="m17.66 17.66 1.41 1.41"></path>
+          <path d="M2 12h2"></path>
+          <path d="M20 12h2"></path>
+          <path d="m6.34 17.66-1.41 1.41"></path>
+          <path d="m19.07 4.93-1.41 1.41"></path>
+        </svg>
+        <svg class="theme-icon icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+        </svg>
+      </button>
+      <button class="nav-contact-btn liquid-button" id="open-contact-nav" type="button">联系我</button>
+    </nav>
+  </header>
+
+  <main id="main">
+    
+    <!-- Hero Section -->
+    <section class="hero" id="top">
+      <div class="hero-copy">
+        <p class="eyebrow">李减除 / 用代码构建生命力 <span class="eyebrow-star" style="font-family: 'Fira Code', monospace; font-weight: 700; letter-spacing: -0.05em;">-÷</span></p>
+        <h1 class="hero-title">你好，<br />我是李减除。</h1>
+        <p class="hero-subtitle">用代码构建富有生命力的交互体验。</p>
+        <div class="hero-intro">
+          <p>AI开发工程师，专注于<strong>智能体协同 (Agent)</strong>、<strong>生成式算法动效</strong>与<strong>高维图形交互</strong>。</p>
+          <p>喜欢把复杂的数学模型与算法推导弄明白，也喜欢把它们写成具有呼吸感、高响应速度的人机交互界面。这里记录我正在推进的工程、技术探索，以及创作思路。</p>
+        </div>
+        <div class="hero-actions">
+          <button class="button-primary liquid-button" id="open-contact-hero" type="button">
+            <span>和我聊聊</span>
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </button>
+          <a class="button-secondary liquid-button" href="#work">
+            <span>查看项目</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Right Interactive Visual (Seamless Living Typography) -->
+      <div class="hero-visual" id="hero-visual">
+        <div class="star-interaction" id="hero-interaction" title="可拖拽旋转三维星云"></div>
+        <div class="visual-ctrls">
+          <button class="visual-btn liquid-button" id="btn-replay" title="重播粒子汇聚">
+            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      </div>
+
+      <p class="hero-footnote">
+        <span style="color: var(--star-color)">✧</span> 从一行清晰的数学规则，到鲜活跃动的数字世界
+      </p>
+    </section>
+
+    <!-- Work / Selected Projects (Wuxianup Row Style) -->
+    <section class="section work" id="work">
+      <!-- 滚动形变目标符号汇聚位点 -->
+      <div class="cursor-slot" id="symbol-slot" aria-hidden="true"></div>
+
+      <header class="section-heading">
+        <p class="eyebrow">现在进行时 ✦</p>
+        <h2 class="section-title">最近在做</h2>
+      </header>
+
+      <!-- Project 01 -->
+      <article class="project-row reveal-on-scroll">
+        <div class="project-meta">
+          <span class="project-number">01</span>
+          <p class="project-state">核心成果 · 代码渲染</p>
+        </div>
+        <div class="project-body">
+          <h3>Swiss 算法动态排版引擎</h3>
+          <p>
+            探索经典“瑞士平面设计（Swiss Style）”严谨网格在现代代码中的动态生命。使用纯算法驱动几何矩阵形变、非线性弹性缓动与拓扑重组，摒弃生硬的生搬硬套，让排版具备音乐般的节奏感。
+          </p>
+          <p class="project-note">“秩序生于算法，灵动归于呼吸。”</p>
+
+          <!-- Local Video Showreel -->
+          <div class="project-media">
+            <div class="media-badge">本地 60FPS 实时渲染演示</div>
+            <video src="showreel_swiss_15s.mp4" poster="swiss_ch2.jpg" controls muted loop playsinline></video>
+          </div>
+
+          <div class="project-tags">
+            <span class="tag">Python / Cairo</span>
+            <span class="tag">Procedural Animation</span>
+            <span class="tag">Swiss Typography</span>
+            <span class="tag">Grid Dynamics</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- Project 02 -->
+      <article class="project-row reveal-on-scroll">
+        <div class="project-meta">
+          <span class="project-number">02</span>
+          <p class="project-state">工程探索 · 音画共振</p>
+        </div>
+        <div class="project-body">
+          <h3>生成式音律与动态光影共振系统</h3>
+          <p>
+            将程序化合成的音频波形进行实时快速傅里叶变换（FFT），提取多频段音量包络与瞬态冲击，驱动三维空间粒子群。声音不再是附赠的背景，而是直接调制视觉画面的神经元。
+          </p>
+          <p class="project-note">从 48kHz WAV 纯数字信号，映射到动态连续流体。</p>
+
+          <!-- Local Video 2 -->
+          <div class="project-media">
+            <div class="media-badge">音频频谱与粒子同频共振</div>
+            <video src="showreel_15s.mp4" poster="preview_scene3.jpg" controls muted loop playsinline></video>
+          </div>
+
+          <div class="project-tags">
+            <span class="tag">Audio DSP</span>
+            <span class="tag">FFT Spectrum</span>
+            <span class="tag">Realtime Waveform</span>
+            <span class="tag">Visual Synthesis</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- Project 03 -->
+      <article class="project-row reveal-on-scroll">
+        <div class="project-meta">
+          <span class="project-number">03</span>
+          <p class="project-state">架构实践 · 智能体</p>
+        </div>
+        <div class="project-body">
+          <h3>多智能体自组织推理交互看板</h3>
+          <p>
+            围绕大语言模型构建具备自主思考、工具链协同调用与反思机制的 Multi-Agent Swarm 系统。通过响应式节点图将智能体之间的决策分歧、代码评测与路由状态具象化呈现给用户。
+          </p>
+          <p class="project-note">让复杂的后台推理流，化为直观清澈的交互视图。</p>
+
+          <div class="project-media">
+            <div class="media-badge">Agent 状态图流转界面</div>
+            <img src="swiss_ch4.jpg" alt="Multi-Agent Dashboard" />
+          </div>
+
+          <div class="project-tags">
+            <span class="tag">LangGraph / LLMs</span>
+            <span class="tag">Agent Swarms</span>
+            <span class="tag">WebSocket Streams</span>
+            <span class="tag">Reactive Canvas</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- Project 04 (Past / Experiment) -->
+      <aside class="project-row past-project reveal-on-scroll">
+        <div class="project-meta">
+          <span class="project-number">过往探索</span>
+          <p class="project-state">图形实验</p>
+        </div>
+        <div class="project-body">
+          <h3>高维神经场流体三维可视化系统</h3>
+          <p>
+            基于浏览器 WebGL 与 GPU Compute Shader，将高维神经网络隐藏层的特征向量投射为具有物理流动感的粒子力场。作为早期探索机器“思考质感”的技术原型留在这里。
+          </p>
+          <div class="project-tags">
+            <span class="tag">WebGL</span>
+            <span class="tag">Three.js</span>
+            <span class="tag">GLSL Shader</span>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <!-- About Me / Personal Story (Wuxianup Story Style) -->
+    <section class="section about" id="about">
+      <header class="section-heading">
+        <p class="eyebrow">关于李减除 ✦</p>
+        <h2 class="section-title">一点我的故事</h2>
+      </header>
+      <div class="story reveal-on-scroll">
+        <p>
+          我喜欢探寻技术的底层原理，也喜欢动手把抽象的逻辑具象化为生动的界面。
+        </p>
+        <p>
+          许多人认为算法是冰冷的矩阵乘法、张量计算和终端日志。但在我看来，<strong>代码是数字世界里最具生命力的黏土</strong>。当把物理动力学、缓动曲线与大模型的主动感知注入其中，屏幕上的每一个元素就拥有了呼吸与温度。
+        </p>
+        <p>
+          在工程上，我追求<strong>“减除”</strong>——去掉无意义的花哨与冗余，保留最纯粹、最优雅的结构与最敏捷的交互响应。
+        </p>
+        <p>
+          现在，我正专注在 AI Agent 智能体应用落地、算法生成式视听系统与现代 Web 端前沿体验。我想看看一个人借助现代 AI 与工程工具，究竟能把交互的边界拓展到什么程度。
+        </p>
+        <span class="story-signature">李减除 <span style="color: var(--star-color)">✦</span></span>
+      </div>
+    </section>
+
+    <!-- Contact Section (Wuxianup Contact Style) -->
+    <section class="section contact-section reveal-on-scroll" id="contact">
+      <span class="contact-star">✧</span>
+      <h2 class="section-title">想一起做点有生命力的事情？</h2>
+      <div class="contact-intro">
+        <p>如果你正在构建有意思的 AI 产品、探索前沿的交互形态，或想交流技术与合作，都随时欢迎联系我。</p>
+        <p>把你的想法或具体需求发给我，我会认真回复每一个真诚的探讨。</p>
+      </div>
+
+      <div class="contact-links">
+        <button class="social-btn liquid-button" id="open-contact-btn" type="button">
+          <i data-lucide="message-circle" class="w-4 h-4 text-emerald-400"></i>
+          <span>微信联系</span>
+        </button>
+        <a class="social-btn liquid-button" href="mailto:541854421@qq.com">
+          <i data-lucide="mail" class="w-4 h-4 text-cyan-400"></i>
+          <span>541854421@qq.com</span>
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Minimal Footer -->
+  <footer class="footer" style="max-width: 1080px; margin: 0 auto; padding: 40px 28px;">
+    <span>李减除 ✦ 用代码构建富有生命力的交互体验</span>
+    <span>© 2026 Jianchu Li</span>
+  </footer>
+
+  <!-- Dialog Modal (Inspired by wuxianup.xyz) -->
+  <dialog class="contact-dialog" id="contact-dialog">
+    <button class="dialog-close" id="close-dialog-btn" type="button" aria-label="关闭">×</button>
+    <p class="eyebrow" style="margin-bottom: 8px;">李减除 / 联系 ✦</p>
+    <h3 class="dialog-title">和我聊聊</h3>
+    <p class="dialog-desc">把具体情况发给我，先聊聊你的想法。</p>
+
+    <!-- 微信号标签与绿色微信图标 -->
+    <div class="wechat-header-label">
+      <svg class="wechat-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="#07c160">
+        <path d="M8.5 2C4.36 2 1 4.91 1 8.5c0 1.94.97 3.69 2.5 4.9L3 17l4.13-1.38c.45.12.92.18 1.37.18.23 0 .47-.02.7-.05A7.16 7.16 0 0 1 8 13.5C8 9.36 11.8 6 16.5 6c.38 0 .76.02 1.13.07C16.48 3.72 12.8 2 8.5 2zm-2.25 4a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5zm4.5 0a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5zM16.5 7.5C12.91 7.5 10 9.96 10 13s2.91 5.5 6.5 5.5c.4 0 .78-.04 1.16-.12L21 19.5l-.88-2.65C21.28 15.68 22 14.41 22 13c0-3.04-2.91-5.5-6.5-5.5zm-2 3.5a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm4 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+      </svg>
+      <span>微信号</span>
+    </div>
+
+    <!-- 微信号展示卡片 -->
+    <div class="wechat-box">
+      <div class="wechat-id-text" id="wechat-val">Nov_1-LJC</div>
+      <button class="qr-toggle-btn" id="qr-toggle-btn" type="button" title="点击展开/收起二维码">
+        <i data-lucide="qr-code" class="w-4 h-4"></i>
+      </button>
+    </div>
+
+    <!-- 微信二维码抽屉 (默认折叠，点击二维码图标展开) -->
+    <div class="wechat-qrcode-container hidden" id="wechat-qrcode-container">
+      <img src="wechat_qrcode.jpg" alt="李减除微信二维码" class="wechat-qrcode-img">
+      <p class="qrcode-hint">微信扫一扫 · 加我为好友</p>
+    </div>
+
+    <!-- 核心操作按钮：交个朋友 (复制 + 唤醒微信) -->
+    <button class="dialog-copy-btn liquid-button" id="copy-btn" type="button">
+      交个朋友
+    </button>
+    <div class="dialog-status" id="copy-status">点击复制微信号，前往微信交个朋友。</div>
+
+    <!-- 底部邮箱快捷入口 -->
+    <div class="dialog-socials">
+      <a class="dialog-email-link liquid-button" href="mailto:541854421@qq.com" title="发送邮件给李减除">
+        <i data-lucide="mail" class="w-4 h-4 text-cyan-400"></i>
+        <span>541854421@qq.com</span>
+      </a>
+    </div>
+  </dialog>
+
+  <!-- Classical Chinese Calligraphy Brush Custom Cursor (Desktop Only: Tip Down, Handle Up) -->
+  <div id="brush-cursor" class="brush-cursor" aria-hidden="true">
+    <svg class="brush-cursor-svg" viewBox="0 0 44 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- 笔杆 (竹节/紫檀，朝向右上立于空中) -->
+      <line x1="21" y1="36" x2="38" y2="8" stroke="var(--brush-shaft, #4a2e1b)" stroke-width="4.6" stroke-linecap="round"/>
+      <line x1="29.5" y1="22.5" x2="31" y2="20" stroke="var(--brush-ring, #d4a373)" stroke-width="5.2" stroke-linecap="round"/>
+      <!-- 笔顶牛角与红丝挂绳 -->
+      <circle cx="38" cy="8" r="3.0" fill="var(--brush-ferrule, #9a683a)"/>
+      <path d="M38 7 C41 4, 43 3, 40 1" stroke="var(--brush-ring, #d4a373)" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+      <!-- 笔斗 (金/黄铜包箍过渡) -->
+      <path d="M15.5 37.5 L 21.5 41.5 L 24 38 L 18 34 Z" fill="var(--brush-ferrule, #9a683a)"/>
+      <!-- 笔毫 (纯正狼毫/兼毫笔身，朝下收拢) -->
+      <path d="M7 52 C 9 46, 12 40, 16 37 L 22 41 C 18 45, 12 49, 7 52 Z" fill="var(--brush-hair, #f0ebe1)"/>
+      <!-- 笔尖墨润 (最尖锐处位于 7, 52，触纸落墨) -->
+      <path d="M7 52 C 8.2 49, 10 44.5, 12.5 42 L 15.5 44 C 13 47, 10 50, 7 52 Z" fill="var(--brush-ink, #050608)"/>
+    </svg>
+  </div>
+
+  <!-- Modern Interaction Scripts: Three.js Core, 3D Particle Universe, Main Controller -->
+  <script src="js/three.min.js"></script>
+  <script src="js/universe.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

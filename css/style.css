@@ -1,0 +1,922 @@
+/* ==========================================================================
+   李减除 个人作品集与前沿交互主控样式表 (style.css)
+   包含了深浅色变量系统、液态流光按钮、毛玻璃弹窗与响应式网格
+   ========================================================================== */
+
+/* 引入本地马善政毛笔行楷字体 */
+@font-face {
+  font-family: 'Ma Shan Zheng';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fonts/MaShanZheng-Regular.ttf') format('truetype');
+}
+
+/* 1. 颜色与设计变量体系 */
+:root {
+  color-scheme: light;
+  --bg: #fafafa;
+  --bg-elevated: #ffffff;
+  --bg-subtle: #f2f3f5;
+  --border: rgba(0, 0, 0, 0.08);
+  --border-hover: rgba(0, 0, 0, 0.22);
+  --text-main: #18191b;
+  --text-muted: #5e646e;
+  --text-faint: #88909b;
+  --accent: #b47b48;
+  --accent-glow: rgba(180, 123, 72, 0.16);
+  --card-bg: rgba(255, 255, 255, 0.85);
+  --star-color: #b47b48;
+  --line: rgba(0, 0, 0, 0.08);
+  --shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
+  --brush-shaft: #4a2e1b;
+  --brush-ring: #b47b48;
+  --brush-ferrule: #9a683a;
+  --brush-hair: #f0ebe1;
+  --brush-ink: #050608;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #111416;
+  --bg-elevated: #181c1f;
+  --bg-subtle: #1e2327;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(255, 255, 255, 0.24);
+  --text-main: #f0f2f5;
+  --text-muted: #9aa1a9;
+  --text-faint: #606873;
+  --accent: #d4a373;
+  --accent-glow: rgba(212, 163, 115, 0.22);
+  --card-bg: rgba(24, 28, 31, 0.75);
+  --star-color: #e5b382;
+  --line: rgba(255, 255, 255, 0.08);
+  --shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.5);
+  --brush-shaft: #2a2c30;
+  --brush-ring: #d4a373;
+  --brush-ferrule: #d4a373;
+  --brush-hair: #e5dcd3;
+  --brush-ink: #e5b382;
+}
+
+/* 2. 基础重置 */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text-main);
+  font-family: "Plus Jakarta Sans", "Noto Sans SC", -apple-system, BlinkMacSystemFont, sans-serif;
+  line-height: 1.7;
+  letter-spacing: -0.01em;
+  transition: background-color 0.4s ease, color 0.4s ease;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+body.contact-open {
+  overflow: hidden;
+}
+
+/* 3. GPU 硬件加速滚动阅读进度条 */
+.reading-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--star-color), #c084fc);
+  transform: scaleX(0);
+  transform-origin: left;
+  z-index: 100;
+  pointer-events: none;
+  transition: transform 0.05s linear;
+}
+
+/* 4. 导航顶栏与玻璃拟态 */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 20px 28px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transition: padding 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.header.scrolled {
+  padding: 12px 28px;
+  background: var(--card-bg);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-main);
+  text-decoration: none;
+  letter-spacing: -0.02em;
+}
+
+.brand-star {
+  color: var(--star-color);
+  font-family: "Fira Code", monospace;
+  font-size: 1.08rem;
+  font-weight: 700;
+  letter-spacing: -0.06em;
+  margin-left: 3px;
+  display: inline-block;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.brand:hover .brand-star {
+  transform: scale(1.18);
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.nav-link {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.nav-link:hover {
+  color: var(--text-main);
+}
+
+/* 5. 液态流光磁性按钮核心架构 (Liquid Magnetic Buttons) */
+.liquid-button {
+  --lx: 50%;
+  --ly: 50%;
+  --liquid-x: 0px;
+  --liquid-y: 0px;
+  --liquid-rx: 0deg;
+  --liquid-ry: 0deg;
+  --liquid-angle: 115deg;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 9999px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transform: translateZ(0);
+  transition: transform 0.45s cubic-bezier(0.18, 0.85, 0.25, 1.3), box-shadow 0.3s, border-color 0.3s, background-color 0.3s;
+}
+
+.liquid-surface {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.liquid-light {
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.liquid-content {
+  position: relative;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 液态按钮深色与浅色质感 */
+[data-theme="dark"] .liquid-button {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #f0f2f5;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+[data-theme="dark"] .liquid-light {
+  background: radial-gradient(circle 90px at var(--lx) var(--ly), rgba(229, 179, 130, 0.45), rgba(255, 255, 255, 0.15) 40%, transparent 80%);
+}
+
+[data-theme="light"] .liquid-button {
+  background: rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: #18191b;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+[data-theme="light"] .liquid-light {
+  background: radial-gradient(circle 90px at var(--lx) var(--ly), rgba(255, 255, 255, 0.9), rgba(180, 123, 72, 0.25) 45%, transparent 80%);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .liquid-button:hover,
+  .liquid-button.is-liquid-hover {
+    transform: perspective(600px) translate3d(var(--liquid-x), var(--liquid-y), 0) rotateX(var(--liquid-rx)) rotateY(var(--liquid-ry));
+  }
+  .liquid-button:hover .liquid-light,
+  .liquid-button.is-liquid-hover .liquid-light {
+    opacity: 1;
+  }
+}
+
+/* 具体各处按钮样式特化 */
+.button-primary {
+  padding: 11px 24px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+[data-theme="dark"] .button-primary {
+  background: #f0f2f5;
+  color: #111416;
+  border-color: transparent;
+}
+[data-theme="light"] .button-primary {
+  background: #18191b;
+  color: #fafafa;
+  border-color: transparent;
+}
+
+.button-secondary {
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.nav-contact-btn {
+  padding: 7px 18px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.theme-toggle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.25s, transform 0.25s, color 0.25s;
+}
+
+.theme-toggle:hover {
+  border-color: var(--border-hover);
+  color: var(--text-main);
+  transform: scale(1.08);
+}
+
+.theme-toggle .theme-icon {
+  width: 18px;
+  height: 18px;
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+  pointer-events: none;
+}
+
+[data-theme="dark"] .icon-sun {
+  display: block;
+  transform: rotate(0deg) scale(1);
+}
+[data-theme="dark"] .icon-moon {
+  display: none;
+}
+[data-theme="light"] .icon-sun {
+  display: none;
+}
+[data-theme="light"] .icon-moon {
+  display: block;
+  transform: rotate(0deg) scale(1);
+}
+
+.theme-toggle.theme-animating .theme-icon {
+  transform: rotate(360deg) scale(1.18);
+}
+
+/* 6. 主内容区与 Hero 布局 */
+main {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 28px;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  font-family: "Fira Code", monospace;
+  letter-spacing: 0.04em;
+  color: var(--text-faint);
+  margin-bottom: 18px;
+}
+
+.hero {
+  padding-top: 150px;
+  padding-bottom: 90px;
+  display: grid;
+  grid-template-columns: 0.95fr 1.25fr;
+  gap: 36px;
+  align-items: center;
+  position: relative;
+}
+
+@media (max-width: 860px) {
+  .hero {
+    grid-template-columns: 1fr;
+    padding-top: 115px;
+    gap: 24px;
+  }
+}
+
+.hero-title {
+  font-size: clamp(2.4rem, 5vw, 3.8rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  margin-bottom: 16px;
+}
+
+.hero-subtitle {
+  font-size: 1.25rem;
+  color: var(--text-muted);
+  font-weight: 400;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.hero-intro {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  margin-bottom: 32px;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.hero-intro strong {
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* 7. 首屏 3D WebGL 画布区域 */
+.hero-visual {
+  position: relative;
+  width: 100%;
+  height: 460px;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+
+#universe-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.star-interaction {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+  touch-action: none;
+  z-index: 2;
+}
+
+.star-interaction:active,
+.star-interaction.dragging {
+  cursor: grabbing;
+}
+
+.cursor-slot {
+  width: min(560px, 88vw);
+  height: clamp(220px, 32vh, 320px);
+  margin: 10px auto 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  pointer-events: none;
+}
+
+.visual-ctrls {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  display: flex;
+  gap: 8px;
+  z-index: 5;
+}
+
+.visual-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: var(--text-faint);
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+}
+
+.hero-footnote {
+  grid-column: 1 / -1;
+  font-size: 0.85rem;
+  color: var(--text-faint);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-top: 10px;
+  font-family: "Fira Code", monospace;
+}
+
+/* 8. 各大正文章节与项目卡片 */
+.section {
+  padding: 90px 0;
+  border-top: 1px solid var(--border);
+}
+
+.section-heading {
+  margin-bottom: 48px;
+}
+
+.section-title {
+  font-size: clamp(1.8rem, 3.5vw, 2.4rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.reveal-on-scroll.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.project-row {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 36px;
+  padding: 36px 0;
+  border-bottom: 1px solid var(--border);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+}
+
+.project-row:hover {
+  border-color: var(--border-hover);
+  transform: translateX(4px);
+}
+
+@media (max-width: 768px) {
+  .project-row {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 28px 0;
+  }
+}
+
+.project-number {
+  font-family: "Fira Code", monospace;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-faint);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.25s ease;
+  display: inline-block;
+}
+
+.project-row:hover .project-number {
+  color: var(--star-color);
+  transform: scale(1.08);
+}
+
+.project-state {
+  font-size: 0.78rem;
+  color: var(--accent);
+  font-family: "Fira Code", monospace;
+}
+
+.project-body h3 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.project-body p {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  line-height: 1.7;
+  margin-bottom: 14px;
+}
+
+.project-note {
+  font-size: 0.88rem !important;
+  color: var(--text-faint) !important;
+  font-style: italic;
+}
+
+.project-media {
+  margin: 18px 0;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  max-width: 640px;
+  position: relative;
+}
+
+.project-media video,
+.project-media img {
+  width: 100%;
+  display: block;
+  object-fit: cover;
+  aspect-ratio: 16 / 9;
+}
+
+.media-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-size: 0.7rem;
+  font-family: "Fira Code", monospace;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  backdrop-filter: blur(4px);
+}
+
+.project-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.tag {
+  font-size: 0.75rem;
+  font-family: "Fira Code", monospace;
+  padding: 3px 10px;
+  border-radius: 6px;
+  background: var(--bg-subtle);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+.past-project {
+  opacity: 0.75;
+}
+
+/* 9. 个人故事与联系区域 */
+.story {
+  max-width: 680px;
+  font-size: 1.02rem;
+  color: var(--text-muted);
+  line-height: 1.85;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.story p strong {
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.story-signature {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-top: 16px;
+  font-family: "Noto Serif SC", serif;
+}
+
+.contact-section {
+  text-align: left;
+  position: relative;
+}
+
+.contact-star {
+  font-size: 1.5rem;
+  color: var(--star-color);
+  display: inline-block;
+  margin-bottom: 12px;
+}
+
+.contact-intro {
+  max-width: 580px;
+  font-size: 1rem;
+  color: var(--text-muted);
+  margin: 16px 0 32px 0;
+  line-height: 1.7;
+}
+
+.contact-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.social-btn {
+  padding: 10px 20px;
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+.footer {
+  padding: 60px 0 40px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--border);
+  font-size: 0.82rem;
+  color: var(--text-faint);
+  font-family: "Fira Code", monospace;
+}
+
+/* 10. 原生 HTML5 模态弹窗 (<dialog>) 高级样式 */
+.contact-dialog {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  border: 1px solid var(--border-hover);
+  border-radius: 24px;
+  background: var(--bg-elevated);
+  color: var(--text-main);
+  padding: 38px 32px;
+  max-width: 420px;
+  width: calc(100% - 36px);
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.45);
+  z-index: 1000;
+  text-align: center;
+}
+
+.contact-dialog::backdrop {
+  background: rgba(13, 21, 43, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.dialog-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  font-size: 1.25rem;
+  color: var(--text-faint);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: all 0.2s;
+}
+
+.dialog-close:hover {
+  color: var(--text-main);
+  border-color: var(--border-hover);
+}
+
+.dialog-title {
+  font-size: 1.45rem;
+  font-weight: 700;
+  margin: 8px 0;
+}
+
+.dialog-desc {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin-bottom: 22px;
+}
+
+.wechat-header-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.wechat-icon-svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.wechat-box {
+  background: var(--bg-subtle);
+  border: 1px solid rgba(180, 123, 72, 0.35);
+  border-radius: 14px;
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  text-align: left;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.wechat-id-text {
+  font-family: "Fira Code", monospace;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--text-main);
+  user-select: all;
+}
+
+.qr-toggle-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  border-radius: 6px;
+  transition: color 0.2s, transform 0.2s;
+}
+
+.qr-toggle-btn:hover {
+  color: var(--text-main);
+  transform: scale(1.15);
+}
+
+.wechat-qrcode-container {
+  margin: 0 auto 16px;
+  padding: 14px;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  max-width: 210px;
+}
+
+.wechat-qrcode-img {
+  width: 170px;
+  height: 170px;
+  object-fit: contain;
+  margin: 0 auto;
+  display: block;
+  border-radius: 8px;
+}
+
+.qrcode-hint {
+  font-size: 0.72rem;
+  color: #666;
+  margin-top: 8px;
+  text-align: center;
+  font-family: sans-serif;
+}
+
+.dialog-copy-btn {
+  width: 100%;
+  padding: 13px;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.dialog-status {
+  font-size: 0.78rem;
+  color: var(--text-faint);
+  margin-top: 12px;
+  min-height: 1.4em;
+}
+
+.dialog-socials {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.dialog-email-link {
+  padding: 8px 18px;
+  font-size: 0.85rem;
+  font-family: "Fira Code", monospace;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+.dialog-email-link:hover {
+  color: var(--text-main);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* ==========================================================================
+   毛笔自定义光标 (Chinese Calligraphy Brush Cursor)
+   完全替换系统鼠标，笔头朝下落纸，笔杆在上方
+   仅在桌面端生效，移动端与触控设备完全自动隐藏
+   ========================================================================== */
+@media (hover: hover) and (pointer: fine) {
+  html, body, *, a, button, input, textarea, select {
+    cursor: none !important;
+  }
+
+  .brush-cursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 44px;
+    height: 56px;
+    pointer-events: none;
+    z-index: 999999;
+    transform: translate3d(-100px, -100px, 0);
+    opacity: 0;
+    will-change: transform;
+    transition: opacity 0.2s ease;
+  }
+
+  .brush-cursor.is-active {
+    opacity: 1;
+  }
+
+  .brush-cursor-svg {
+    width: 100%;
+    height: 100%;
+    transform-origin: 7px 52px;
+    transition: transform 0.16s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.2s ease;
+  }
+
+  /* 落笔顿笔微动效：鼠标按下时笔头向纸面微压顿挫，尽显书法按笔质感 */
+  .brush-cursor.is-pressing .brush-cursor-svg {
+    transform: scale(0.92, 0.88) rotate(-7deg) translate(0px, 2px);
+  }
+
+  /* 悬停可交互元素：笔尖微扬并附带墨韵微光 */
+  .brush-cursor.is-hovering .brush-cursor-svg {
+    transform: scale(1.08) rotate(4deg) translate(0px, -2px);
+    filter: drop-shadow(0 2px 8px var(--accent-glow));
+  }
+}
+
+@media (hover: none), (pointer: coarse) {
+  .brush-cursor {
+    display: none !important;
+  }
+}
+
