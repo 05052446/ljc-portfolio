@@ -155,6 +155,12 @@ body.contact-open {
   gap: 16px;
 }
 
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .nav-link {
   font-size: 0.9rem;
   color: var(--text-muted);
@@ -540,7 +546,7 @@ main {
 }
 
 @media (max-width: 768px) {
-  /* 顶栏极致精简：隐藏中间导航链接，确保“李减除”单行展示不折行，操作按钮紧凑排布 */
+  /* 顶栏极致精简：隐藏中间导航链接，常驻右侧主题与联系我按钮，单行整洁美观 */
   .header {
     padding: 12px 16px;
     width: 100%;
@@ -549,6 +555,7 @@ main {
   .brand {
     font-size: 1.05rem;
     white-space: nowrap;
+    flex-shrink: 0;
   }
 
   .nav-links {
@@ -556,7 +563,10 @@ main {
   }
 
   .nav-actions {
+    display: flex !important;
+    align-items: center;
     gap: 8px;
+    flex-shrink: 0;
   }
 
   .nav-contact-btn {
@@ -573,49 +583,55 @@ main {
     padding: 0 16px;
   }
 
-  /* 首屏 Hero 区域自适应 */
+  /* 首屏 Hero 区域自适应：紧凑排布，确保 3D 粒子签名“李减除”全貌第一眼即完整呈现 */
   .hero {
-    padding-top: 76px;
-    padding-bottom: 20px;
-    gap: 16px;
+    padding-top: 56px;
+    padding-bottom: 12px;
+    gap: 10px;
+  }
+
+  .eyebrow {
+    margin-bottom: 6px;
+    font-size: 0.78rem;
   }
 
   .hero-title {
-    font-size: clamp(1.85rem, 7vw, 2.3rem);
-    line-height: 1.2;
-    margin-bottom: 10px;
+    font-size: clamp(1.75rem, 6.5vw, 2.1rem);
+    line-height: 1.15;
+    margin-bottom: 6px;
   }
 
   .hero-subtitle {
-    font-size: 1.05rem;
-    margin-bottom: 14px;
+    font-size: 0.95rem;
+    margin-bottom: 10px;
   }
 
   .hero-intro {
-    font-size: 0.88rem;
-    margin-bottom: 18px;
-    line-height: 1.55;
-    gap: 8px;
+    font-size: 0.82rem;
+    margin-bottom: 12px;
+    line-height: 1.48;
+    gap: 6px;
   }
 
   .hero-actions {
-    gap: 10px;
+    gap: 8px;
+    margin-bottom: 2px;
   }
 
   .hero-actions .button-primary,
   .hero-actions .button-secondary {
-    padding: 9px 18px;
-    font-size: 0.88rem;
+    padding: 8px 16px;
+    font-size: 0.82rem;
   }
 
   /* 首屏 3D WebGL 交互容器紧凑化高度，居中舒适展现 */
   .hero-visual {
-    height: 250px;
-    margin: 10px 0 6px;
+    height: 210px;
+    margin: 6px 0 2px;
   }
 
   .hero-footnote {
-    font-size: 0.78rem;
+    font-size: 0.75rem;
     padding-top: 2px;
   }
 
@@ -633,7 +649,21 @@ main {
   }
 
   .section {
-    padding: 60px 0;
+    padding: 50px 0;
+  }
+
+  /* 页脚垂直居中单列排版，彻底解决折行断裂错位 */
+  .footer {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+    padding: 36px 16px;
+  }
+
+  .footer-copy,
+  .footer-meta {
+    text-align: center;
+    white-space: normal;
   }
 }
 
@@ -726,6 +756,7 @@ main {
 
 .past-project {
   opacity: 0.75;
+  border-bottom: none;
 }
 
 /* 9. 个人故事与联系区域 */

@@ -197,17 +197,19 @@
       // 1. 中心位置在首屏 Hero 区域到下方 Slot 区域平滑过渡
       vec3 centerOffset = mix(uHeroPos, uSlotPos, t);
 
-      // 2. 个体非线性物理缓动
-      float delay = aPhase * 0.22;
-      float localT = clamp((t - delay) / 0.78, 0.0, 1.0);
+      // 2. 个体非线性物理缓动：根据粒子 X 坐标形成自左向右如水波般优雅层叠汇聚，彻底消除随机错乱弯折
+      float xNorm = clamp((position.x + 2.5) / 5.0, 0.0, 1.0);
+      float delay = xNorm * 0.14 + aPhase * 0.05;
+      float localT = clamp((t - delay) / 0.80, 0.0, 1.0);
       float morphEased = localT * localT * (3.0 - 2.0 * localT);
 
-      // 3. 向下滑动中段向全屏漫天散开的流星波浪 (支持移动端 uScale 缩放)
-      float disperse = sin(morphEased * 3.1415926) * (2.25 * uDisperseScale);
+      // 3. 向下滑动中段优雅适度微散，既有生动呼吸感，又不会将笔画撕裂扭曲成曲棍球棒状
+      float disperse = sin(morphEased * 3.1415926) * (0.85 * uDisperseScale);
       vec3 shapePos = (mix(position, aLogoPos, morphEased) + aScatter * disperse) * uScale;
 
-      // 重播爆散聚合缓动
-      shapePos += aScatter * ((1.0 - uAssemble) * 6.5);
+      // 4. 重播爆散聚合缓动：克制优雅的局部水墨/星光呼吸散开，避免漫天噪波
+      float assembleDisperse = (1.0 - uAssemble) * (2.2 * uScale);
+      shapePos += aScatter * assembleDisperse;
 
       // 4. 围绕自身局部中心进行纯手动 360 度旋转 (默认无自转，正面朝前)
       float cx = cos(uRot.x), sx = sin(uRot.x);
@@ -251,7 +253,9 @@
       }
 
       float twinkle = 0.82 + 0.18 * sin(uTime * 2.8 + aPhase * 6.28);
-      vAlpha = twinkle;
+      // 爆散瞬间适当羽化微透，重聚时清晰饱满
+      float assembleAlpha = smoothstep(0.0, 0.45, uAssemble);
+      vAlpha = twinkle * mix(0.42, 1.0, assembleAlpha);
 
       // 暗色模式金芒 (0.92, 0.75, 0.52) 与冰蓝钻星 (0.95, 0.97, 1.0)
       vec3 gold = vec3(0.92, 0.75, 0.52);
