@@ -431,6 +431,13 @@
     let lastX = 0;
     let lastY = 0;
 
+    // 平滑缓柔回正状态机 (Silk-Smooth Auto-Recenter)
+    let isReturning = false;
+    let returnStartTime = 0;
+    let returnDuration = 950;
+    let returnStartX = 0;
+    let returnStartY = 0;
+
     const heroVisual = document.querySelector('#hero-visual') || document.querySelector('.hero-visual');
     const heroInteraction = document.querySelector('#hero-interaction') || heroVisual;
     const symbolSlot = document.querySelector('#symbol-slot') || document.querySelector('.cursor-slot');
@@ -476,16 +483,36 @@
     }
     window.addEventListener('scroll', onScroll, { passive: true });
 
-    // 交互绑定：支持 360 度全向无死角自由拖拽旋转，松开时自动平滑回正
+    // 缓柔平滑自动回正触发器 (Silk-Smooth Auto-Recenter with Smootherstep)
+    function triggerSmoothRecenter() {
+      // 1. 将当前累积旋转角度折算至最近的 [-π, π] 最短弧度区间，保证走最短捷径
+      rotX = Math.atan2(Math.sin(rotX), Math.cos(rotX));
+      rotY = Math.atan2(Math.sin(rotY), Math.cos(rotY));
+      returnStartX = rotX;
+      returnStartY = rotY;
+
+      const maxAngle = Math.max(Math.abs(rotX), Math.abs(rotY));
+      if (maxAngle < 0.003) {
+        rotX = 0.0;
+        rotY = 0.0;
+        targetRotX = 0.0;
+        targetRotY = 0.0;
+        isReturning = false;
+        return;
+      }
+
+      // 动态时长：偏角较小约 850ms，偏角较大约 1300ms，极其平缓沉静
+      returnDuration = Math.min(Math.max(850 + maxAngle * 280, 850), 1350);
+      returnStartTime = performance.now();
+      isReturning = true;
+    }
+
+    // 交互绑定：支持 360 度全向无死角自由拖拽旋转，松开时缓柔平滑回正
     const endHeroDrag = (e) => {
       if (isDragging) {
         isDragging = false;
         if (heroInteraction) heroInteraction.classList.remove('dragging');
-        // 【核心交互：松开鼠标时，将当前累积弧度换算至 [-π, π]，沿最短路径平滑回正到正面朝前！】
-        rotX = Math.atan2(Math.sin(rotX), Math.cos(rotX));
-        rotY = Math.atan2(Math.sin(rotY), Math.cos(rotY));
-        targetRotX = 0.0;
-        targetRotY = 0.0;
+        triggerSmoothRecenter();
         try {
           if (e && e.pointerId && heroInteraction && heroInteraction.hasPointerCapture && heroInteraction.hasPointerCapture(e.pointerId)) {
             heroInteraction.releasePointerCapture(e.pointerId);
@@ -497,6 +524,10 @@
     if (heroInteraction) {
       heroInteraction.addEventListener('pointerdown', (e) => {
         isDragging = true;
+        isReturning = false;
+        // 接管当前实时角度，零跳变无缝跟手
+        targetRotX = rotX;
+        targetRotY = rotY;
         lastX = e.clientX;
         lastY = e.clientY;
         heroInteraction.classList.add('dragging');
@@ -531,9 +562,10 @@
     window.addEventListener('pointerup', endHeroDrag);
     window.addEventListener('pointercancel', endHeroDrag);
 
-    // 键盘支持 (方向键 360 度旋转，松开同样平滑回正)
+    // 键盘支持 (方向键 360 度旋转，松开同样温和回正)
     window.addEventListener('keydown', (e) => {
       if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+        isReturning = false;
         if (e.key === 'ArrowLeft') targetRotY -= 0.12;
         if (e.key === 'ArrowRight') targetRotY += 0.12;
         if (e.key === 'ArrowUp') targetRotX -= 0.12;
@@ -543,10 +575,7 @@
 
     window.addEventListener('keyup', (e) => {
       if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
-        rotX = Math.atan2(Math.sin(rotX), Math.cos(rotX));
-        rotY = Math.atan2(Math.sin(rotY), Math.cos(rotY));
-        targetRotX = 0.0;
-        targetRotY = 0.0;
+        triggerSmoothRecenter();
       }
     });
 
@@ -576,6 +605,7 @@
     function replay() {
       assembleProgress = 0.0;
       uniforms.uAssemble.value = 0.0;
+      isReturning = false;
       targetRotX = 0.0;
       targetRotY = 0.0;
       rotX = 0.0;
@@ -596,9 +626,29 @@
         uniforms.uAssemble.value = assembleProgress;
       }
 
-      // 【核心设定：默认正面朝前！拖拽时响应旋转，松开时以 0.085 缓动系数自动平滑回正】
-      rotX += (targetRotX - rotX) * 0.085;
-      rotY += (targetRotY - rotY) * 0.085;
+      // 【核心缓动：拖拽时灵敏跟手，松开时采用五次 smootherstep 极度柔和缓润回正，绝无生硬突兀感】
+      if (isReturning) {
+        const elapsed = performance.now() - returnStartTime;
+        const p = Math.min(elapsed / returnDuration, 1.0);
+        // 五次 smootherstep: 6p^5 - 15p^4 + 10p^3，一阶与二阶加速度端点全部平滑归零
+        const ease = p * p * p * (p * (p * 6.0 - 15.0) + 10.0);
+        rotX = returnStartX * (1.0 - ease);
+        rotY = returnStartY * (1.0 - ease);
+        targetRotX = rotX;
+        targetRotY = rotY;
+
+        if (p >= 1.0) {
+          isReturning = false;
+          rotX = 0.0;
+          rotY = 0.0;
+          targetRotX = 0.0;
+          targetRotY = 0.0;
+        }
+      } else {
+        // 拖拽跟随状态：丝滑低延迟跟手
+        rotX += (targetRotX - rotX) * 0.12;
+        rotY += (targetRotY - rotY) * 0.12;
+      }
 
       uniforms.uRot.value.set(rotX, rotY);
       renderer.render(scene, camera);
