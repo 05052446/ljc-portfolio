@@ -683,10 +683,29 @@
     }
     window.addEventListener('resize', onResize, { passive: true });
 
-    // 监听字体就绪后重新高精度采样马善政行楷笔画
-    if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(() => {
+    // 确保移动端与桌面端在字体下载就绪后，以最高精度马善政毛笔行楷重新采样点阵
+    function triggerFontUpdate() {
+      try {
         updatePointsData(particleCount);
+      } catch (err) {
+        console.warn('[Universe] font resample error:', err);
+      }
+    }
+
+    if (document.fonts) {
+      const fontQuery = 'normal 275px "Ma Shan Zheng"';
+      if (document.fonts.load) {
+        document.fonts.load(fontQuery).then(() => {
+          triggerFontUpdate();
+        }).catch(() => {});
+      }
+      if (document.fonts.ready) {
+        document.fonts.ready.then(() => {
+          triggerFontUpdate();
+        });
+      }
+      document.fonts.addEventListener('loadingdone', () => {
+        triggerFontUpdate();
       });
     }
 

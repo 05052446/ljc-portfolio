@@ -3,13 +3,14 @@
    包含了深浅色变量系统、液态流光按钮、毛玻璃弹窗与响应式网格
    ========================================================================== */
 
-/* 引入本地马善政毛笔行楷字体 */
+/* 引入马善政毛笔行楷字体 (优先 200KB 极速 Web WOFF2，本地 TTF 兜底) */
 @font-face {
   font-family: 'Ma Shan Zheng';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('../fonts/MaShanZheng-Regular.ttf') format('truetype');
+  src: url('../fonts/MaShanZheng-Web.woff2') format('woff2'),
+       url('../fonts/MaShanZheng-Regular.ttf') format('truetype');
 }
 
 /* 1. 颜色与设计变量体系 */
@@ -125,11 +126,12 @@ body.contact-open {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 1.15rem;
-  font-weight: 700;
+  font-family: 'Ma Shan Zheng', "STKaiti", "KaiTi", cursive, serif;
+  font-size: 1.35rem;
+  font-weight: 400;
   color: var(--text-main);
   text-decoration: none;
-  letter-spacing: -0.02em;
+  letter-spacing: 0.02em;
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -368,10 +370,11 @@ main {
 }
 
 .hero-title {
-  font-size: clamp(2.4rem, 5vw, 3.8rem);
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1.15;
+  font-family: 'Ma Shan Zheng', "STKaiti", "KaiTi", cursive, serif;
+  font-size: clamp(2.5rem, 5.2vw, 3.9rem);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  line-height: 1.25;
   margin-bottom: 16px;
 }
 
@@ -553,7 +556,7 @@ main {
   }
 
   .brand {
-    font-size: 1.05rem;
+    font-size: 1.2rem;
     white-space: nowrap;
     flex-shrink: 0;
   }
@@ -596,8 +599,8 @@ main {
   }
 
   .hero-title {
-    font-size: clamp(1.75rem, 6.5vw, 2.1rem);
-    line-height: 1.15;
+    font-size: clamp(1.9rem, 7.2vw, 2.35rem);
+    line-height: 1.22;
     margin-bottom: 6px;
   }
 
