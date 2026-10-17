@@ -321,6 +321,30 @@
     });
   }
 
+  // 8.1 粒子复原/重播按钮交互 (爆散重聚 + 图标旋转)
+  const btnReplay = document.getElementById('btn-replay');
+  if (btnReplay) {
+    btnReplay.addEventListener('pointerdown', (e) => e.stopPropagation());
+    btnReplay.addEventListener('mousedown', (e) => e.stopPropagation());
+    btnReplay.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      // 旋转动效
+      btnReplay.classList.remove('is-spinning');
+      void btnReplay.offsetWidth;
+      btnReplay.classList.add('is-spinning');
+      setTimeout(() => btnReplay.classList.remove('is-spinning'), 650);
+
+      // 调用 WebGL 粒子系统复位重播
+      if (universeInstance && typeof universeInstance.replay === 'function') {
+        universeInstance.replay();
+      } else if (window.__universeInstance && typeof window.__universeInstance.replay === 'function') {
+        window.__universeInstance.replay();
+      }
+    });
+  }
+
   // 9. 毛笔专属光标控制器 (Chinese Calligraphy Brush Controller)
   function initBrushCursor() {
     const cursor = document.getElementById('brush-cursor');

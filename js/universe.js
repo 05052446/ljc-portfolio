@@ -186,6 +186,7 @@
     uniform float uLightMode;
     uniform float uParticleScale;
     uniform float uDisperseScale;
+    uniform float uScale;
 
     varying vec3 vColor;
     varying float vAlpha;
@@ -201,9 +202,9 @@
       float localT = clamp((t - delay) / 0.78, 0.0, 1.0);
       float morphEased = localT * localT * (3.0 - 2.0 * localT);
 
-      // 3. 向下滑动中段向全屏漫天散开的流星波浪
+      // 3. 向下滑动中段向全屏漫天散开的流星波浪 (支持移动端 uScale 缩放)
       float disperse = sin(morphEased * 3.1415926) * (2.25 * uDisperseScale);
-      vec3 shapePos = mix(position, aLogoPos, morphEased) + aScatter * disperse;
+      vec3 shapePos = (mix(position, aLogoPos, morphEased) + aScatter * disperse) * uScale;
 
       // 重播爆散聚合缓动
       shapePos += aScatter * ((1.0 - uAssemble) * 6.5);
@@ -240,12 +241,13 @@
 
       gl_Position = projectionMatrix * mvPosition;
 
-      // 6. 微粒尺寸：支持实时动态缩放 uParticleScale
-      float baseSize = aSize * (26.0 / -mvPosition.z) * uPixelRatio;
+      // 6. 微粒尺寸：支持实时动态缩放 uParticleScale 与移动端 uScale 自适应
+      float sizeScale = mix(1.0, uScale, 0.35);
+      float baseSize = aSize * (26.0 / -mvPosition.z) * uPixelRatio * sizeScale;
       if (uLightMode > 0.5) {
-        gl_PointSize = clamp(baseSize * 1.55 * uParticleScale, 1.5 * uPixelRatio, 14.0 * uPixelRatio);
+        gl_PointSize = clamp(baseSize * 1.55 * uParticleScale, 1.2 * uPixelRatio, 12.0 * uPixelRatio);
       } else {
-        gl_PointSize = clamp(baseSize * uParticleScale, 1.2, 8.0 * uPixelRatio);
+        gl_PointSize = clamp(baseSize * uParticleScale, 1.0, 7.5 * uPixelRatio);
       }
 
       float twinkle = 0.82 + 0.18 * sin(uTime * 2.8 + aPhase * 6.28);
@@ -395,7 +397,8 @@
       uParticleScale: { value: initialPreset.size / 4.5 },
       uDisperseScale: { value: initialPreset.disperse / 2.25 },
       uLightAlpha: { value: initialPreset.alpha },
-      uSharpness: { value: initialPreset.sharpness }
+      uSharpness: { value: initialPreset.sharpness },
+      uScale: { value: 1.0 }
     };
 
     const material = new THREE.ShaderMaterial({
@@ -433,15 +436,15 @@
     const symbolSlot = document.querySelector('#symbol-slot') || document.querySelector('.cursor-slot');
 
     function updateLayoutPositions() {
+      const isMob = window.innerWidth <= 768;
       if (heroVisual) {
         const rect = heroVisual.getBoundingClientRect();
-        // 桌面端横向向右微调偏置（+68px），让“除”字最右侧笔画恰好对齐右侧红线基准位置！
-        const offsetX = window.innerWidth > 768 ? 68 : 0;
+        // 桌面端横向向右微调偏置（+68px），手机端严格水平居中（0px）
+        const offsetX = isMob ? 0 : 68;
         const pos = screenToWorld(rect.left + rect.width / 2 + offsetX, rect.top + rect.height / 2);
         uniforms.uHeroPos.value.set(pos.x, pos.y, 0.0);
       } else {
-        const defaultX = window.innerWidth > 768 ? 2.9 : 0.0;
-        uniforms.uHeroPos.value.set(defaultX, 0.0, 0.0);
+        uniforms.uHeroPos.value.set(isMob ? 0.0 : 2.9, 0.0, 0.0);
       }
 
       if (symbolSlot) {
@@ -473,7 +476,24 @@
     }
     window.addEventListener('scroll', onScroll, { passive: true });
 
-    // 交互绑定：支持 360 度全向无死角手动拖拽旋转
+    // 交互绑定：支持 360 度全向无死角自由拖拽旋转，松开时自动平滑回正
+    const endHeroDrag = (e) => {
+      if (isDragging) {
+        isDragging = false;
+        if (heroInteraction) heroInteraction.classList.remove('dragging');
+        // 【核心交互：松开鼠标时，将当前累积弧度换算至 [-π, π]，沿最短路径平滑回正到正面朝前！】
+        rotX = Math.atan2(Math.sin(rotX), Math.cos(rotX));
+        rotY = Math.atan2(Math.sin(rotY), Math.cos(rotY));
+        targetRotX = 0.0;
+        targetRotY = 0.0;
+        try {
+          if (e && e.pointerId && heroInteraction && heroInteraction.hasPointerCapture && heroInteraction.hasPointerCapture(e.pointerId)) {
+            heroInteraction.releasePointerCapture(e.pointerId);
+          }
+        } catch (err) {}
+      }
+    };
+
     if (heroInteraction) {
       heroInteraction.addEventListener('pointerdown', (e) => {
         isDragging = true;
@@ -486,55 +506,47 @@
         } catch (err) {}
       });
 
-      heroInteraction.addEventListener('pointermove', (e) => {
-        const normX = (e.clientX / window.innerWidth) * 2 - 1;
-        const normY = -(e.clientY / window.innerHeight) * 2 + 1;
-        uniforms.uPointer.value.set(normX, normY);
-
-        if (isDragging) {
-          const dx = e.clientX - lastX;
-          const dy = e.clientY - lastY;
-          // 支持 360 度任意旋转，全自由度！
-          targetRotY += dx * 0.008;
-          targetRotX += dy * 0.008;
-          lastX = e.clientX;
-          lastY = e.clientY;
-        }
-      }, { passive: true });
-
-      const endHeroDrag = (e) => {
-        if (isDragging) {
-          isDragging = false;
-          heroInteraction.classList.remove('dragging');
-          try {
-            if (e && e.pointerId) heroInteraction.releasePointerCapture(e.pointerId);
-          } catch (err) {}
-        }
-      };
-
       heroInteraction.addEventListener('pointerup', endHeroDrag);
       heroInteraction.addEventListener('pointercancel', endHeroDrag);
-      heroInteraction.addEventListener('pointerleave', () => {
-        uniforms.uRepel.value = 0.0;
-        uniforms.uPointer.value.set(-10, -10);
-        if (!isDragging) isDragging = false;
-      });
     }
 
+    // 全局拖拽追踪：即便鼠标急速拖拽至屏幕任意位置，也能持续精准 360 度旋转与平滑回正
     window.addEventListener('pointermove', (e) => {
       const normX = (e.clientX / window.innerWidth) * 2 - 1;
       const normY = -(e.clientY / window.innerHeight) * 2 + 1;
       uniforms.uPointer.value.set(normX, normY);
-      uniforms.uRepel.value = 0.7;
+      uniforms.uRepel.value = isDragging ? 1.0 : 0.7;
+
+      if (isDragging) {
+        const dx = e.clientX - lastX;
+        const dy = e.clientY - lastY;
+        // 360 度自由度旋转
+        targetRotY += dx * 0.008;
+        targetRotX += dy * 0.008;
+        lastX = e.clientX;
+        lastY = e.clientY;
+      }
     }, { passive: true });
 
-    // 键盘支持 (方向键 360 度旋转)
+    window.addEventListener('pointerup', endHeroDrag);
+    window.addEventListener('pointercancel', endHeroDrag);
+
+    // 键盘支持 (方向键 360 度旋转，松开同样平滑回正)
     window.addEventListener('keydown', (e) => {
       if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
-        if (e.key === 'ArrowLeft') targetRotY -= 0.1;
-        if (e.key === 'ArrowRight') targetRotY += 0.1;
-        if (e.key === 'ArrowUp') targetRotX -= 0.1;
-        if (e.key === 'ArrowDown') targetRotX += 0.1;
+        if (e.key === 'ArrowLeft') targetRotY -= 0.12;
+        if (e.key === 'ArrowRight') targetRotY += 0.12;
+        if (e.key === 'ArrowUp') targetRotX -= 0.12;
+        if (e.key === 'ArrowDown') targetRotX += 0.12;
+      }
+    });
+
+    window.addEventListener('keyup', (e) => {
+      if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+        rotX = Math.atan2(Math.sin(rotX), Math.cos(rotX));
+        rotY = Math.atan2(Math.sin(rotY), Math.cos(rotY));
+        targetRotX = 0.0;
+        targetRotY = 0.0;
       }
     });
 
@@ -560,13 +572,15 @@
       updateThemeMode(isLight);
     });
 
-    // 重播复位：回归正面朝前 (0, 0)，重新汇聚
+    // 重播复位：重置粒子汇聚并回归正面朝前 (0, 0)，重新爆散聚合
     function replay() {
       assembleProgress = 0.0;
+      uniforms.uAssemble.value = 0.0;
       targetRotX = 0.0;
       targetRotY = 0.0;
       rotX = 0.0;
       rotY = 0.0;
+      uniforms.uRot.value.set(0.0, 0.0);
     }
 
     let clock = new THREE.Clock();
@@ -582,28 +596,34 @@
         uniforms.uAssemble.value = assembleProgress;
       }
 
-      // 【核心设定：默认不自动自转，正面朝前！仅响应手动惯性旋转】
-      rotX += (targetRotX - rotX) * 0.08;
-      rotY += (targetRotY - rotY) * 0.08;
+      // 【核心设定：默认正面朝前！拖拽时响应旋转，松开时以 0.085 缓动系数自动平滑回正】
+      rotX += (targetRotX - rotX) * 0.085;
+      rotY += (targetRotY - rotY) * 0.085;
 
       uniforms.uRot.value.set(rotX, rotY);
       renderer.render(scene, camera);
     }
     animate();
 
+    // 移动端粒子三维视口自适应缩放（留出舒适边距，彻底消除“李”与“除”两侧裁切）
+    function updateMobileScale() {
+      const w = window.innerWidth;
+      if (w <= 768) {
+        uniforms.uScale.value = Math.min(Math.max(w / 660.0, 0.46), 0.70);
+      } else {
+        uniforms.uScale.value = 1.0;
+      }
+    }
+
     function onResize() {
       const w = window.innerWidth;
       const h = window.innerHeight;
       camera.aspect = w / h;
-      // 移动端视锥自适应：屏幕宽度小于 768px 时，平滑调整相机距离以完整容纳三字不裁切
-      if (w < 768) {
-        camera.position.z = Math.min(10.0 * (660 / Math.max(w, 320)), 15.5);
-      } else {
-        camera.position.z = 10.0;
-      }
+      camera.position.z = 10.0;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h, false);
       uniforms.uPixelRatio.value = Math.min(window.devicePixelRatio || 1, 2);
+      updateMobileScale();
       updateLayoutPositions();
       onScroll();
     }
@@ -622,6 +642,7 @@
     }
 
     setTimeout(() => {
+      updateMobileScale();
       updateLayoutPositions();
       onScroll();
       updateThemeMode(document.documentElement.dataset.theme !== 'dark');
